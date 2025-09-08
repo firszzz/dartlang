@@ -44,7 +44,10 @@ PROTECTED_COMMANDS_FULL = [
     "path",
     "index",
     "Index",
+    "IndexCustom",
+    "NoIndex",
     "code",
+    "syntax",
     "texttt",
     "tt",
     "kw",
@@ -150,9 +153,9 @@ def make_placeholders(text: str):
             token = put(segment)
             text = text[:m.start()] + token + text[m.end():]
 
-    # 4) Protect fully-argument commands like \ref{...}, \label{...}, etc.
+    # 4) Protect fully-argument commands like \ref{...}, \label{...}, \code{...}, \syntax{...}
     for cmd in PROTECTED_COMMANDS_FULL:
-        pattern = re.compile(rf"\\{cmd} *\{{[^\n\r\{{\}}]*\}}")
+        pattern = re.compile(rf"\\{cmd} *\{{[\s\S]*?\}}", re.DOTALL)
         while True:
             m = pattern.search(text)
             if not m:
@@ -161,22 +164,15 @@ def make_placeholders(text: str):
             token = put(segment)
             text = text[:m.start()] + token + text[m.end():]
 
-    # 5) Protect all control sequences except sectioning commands (command token only)
+    # 5) Protect all control sequences (command token only)
     control_seq_re = re.compile(r"\\[a-zA-Z]+\*?")
     while True:
         m = control_seq_re.search(text)
         if not m:
             break
         cmd = m.group(0)
-        name = cmd[1:].rstrip("*")
-        if name in SECTIONING_COMMANDS:
-            # Leave command token intact for later, do not protect
-            # But protect the command token itself to avoid translation altering it
-            token = put(cmd)
-            text = text[:m.start()] + token + text[m.end():]
-        else:
-            token = put(cmd)
-            text = text[:m.start()] + token + text[m.end():]
+        token = put(cmd)
+        text = text[:m.start()] + token + text[m.end():]
 
     # 6) Protect double backslash and other single-char control sequences
     single_ctrl_re = re.compile(r"\\[^a-zA-Z]")
@@ -290,9 +286,6 @@ def main():
     ensure_argos_model()
 
     src = SRC_FILE.read_text(encoding="utf-8")
-
-    # Protect comments: we won't translate pure comment lines, but they'll remain in place
-    # For simplicity we keep them as part of the text, protection will cover commands.
 
     # Protect LaTeX structures with placeholders
     masked, placeholders = make_placeholders(src)

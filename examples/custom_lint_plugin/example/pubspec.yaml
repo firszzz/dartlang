@@ -1,0 +1,6 @@
+name: custom_lint_plugin_example
+description: Consumer package that enables the example custom_lint_plugin.
+publish_to: none
+
+environment:
+  sdk: ^3.10.0

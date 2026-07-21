@@ -1,0 +1,10 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - example/**
+
+linter:
+  rules:
+    # Reflective loader requires test_* method names.
+    non_constant_identifier_names: false

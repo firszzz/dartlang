@@ -1,0 +1,8 @@
+# Enable the local plugin package. After changing `plugins`, restart the
+# Dart Analysis Server (in VS Code / Cursor: "Dart: Restart Analysis Server").
+plugins:
+  custom_lint_plugin:
+    path: ../
+    diagnostics:
+      # Lint rules are disabled by default; turn them on explicitly.
+      no_await: true
